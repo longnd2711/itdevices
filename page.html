@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><?= pageTitle ?></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      background-color: #F5F5F4;
+      color: #333;
+    }
+
+    .page-header {
+      background-color: #fff;
+      padding: 20px 15px;
+      border-bottom: 1px solid #e0e0e0;
+      width: 100%;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .company-title {
+      font-family: 'Be Vietnam Pro', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: #1E40AF;
+      margin: 0 0 10px 0;
+      text-align: center;
+    }
+
+    .company-logo {
+      max-width: 200px;
+      height: auto;
+    }
+
+    .content-wrapper {
+      width: 100%;
+      max-width: 1280px;
+      box-sizing: border-box;
+      margin-left: auto;
+      margin-right: auto;
+      padding: 1px 15px; /* Thêm padding để nội dung không dính sát viền */
+    }
+
+    .back-link {
+      display: block;
+      width: fit-content;
+      margin: 25px auto 40px auto;
+      padding: 12px 24px;
+      background-color: #4285F4;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: background-color 0.3s;
+      font-size: 1.1em;
+      font-weight: bold;
+    }
+
+    .back-link:hover {
+      background-color: #357ae8;
+    }
+
+    @media (max-width: 768px) {
+      .company-title {
+        font-size: 1.4rem;
+      }
+
+      .company-logo {
+        max-width: 180px;
+      }
+
+      .back-link {
+        padding: 15px 30px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="page-header">
+    <h1 class="company-title">CÔNG TY CỔ PHẦN CHẾ TẠO ĐIỆN CƠ HEM</h1>
+    <img src="https://hem.com.vn/wp-content/uploads/2024/04/Blue-Logo.png" alt="Logo Công ty HEM" class="company-logo" onerror="this.style.display='none'">
+  </header>
+
+  <div class="content-wrapper">
+    <?!= pageContent ?>
+  </div>
+
+  <a href="<?= appUrl ?>" class="back-link" target="_top">⬅️ Quay lại trang tra cứu</a>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Tìm tất cả thẻ <a> bên trong khu vực nội dung chính
+      const contentLinks = document.querySelectorAll('.content-wrapper a');
+      
+      contentLinks.forEach(link => {
+        // Chỉ thêm target nếu nó chưa được thiết lập
+        if (!link.target) {
+          link.target = '_top';
+        }
+      });
+    });
+  </script>
+
+</body>
+
+</html>
