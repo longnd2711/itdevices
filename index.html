@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #f0f2f5;
+      margin: 0;
+      padding: 20px 15px;
+      box-sizing: border-box;
+    }
+
+    #container {
+      width: 100%;
+      max-width: 500px;
+      padding: 30px;
+      background-color: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      box-sizing: border-box;
+    }
+
+    #company-name {
+      font-weight: bold;
+      text-transform: uppercase;
+      color: #1c3d5a;
+      font-size: 22px;
+      margin-bottom: 20px;
+      white-space: nowrap;
+    }
+
+    #logo {
+      width: 100%;
+      max-width: 180px;
+      height: auto;
+      margin-bottom: 30px;
+    }
+
+    h2.page-title {
+      color: #ff6622;
+      font-size: 24px;
+      font-weight: bold;
+      margin: 0 0 25px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 15px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 17px;
+      box-sizing: border-box;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #4285F4;
+      box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.25);
+    }
+
+    #button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    .btn {
+      display: block;
+      padding: 16px;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      text-align: center;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    #search-button {
+      background-color: #4285F4;
+    }
+
+    #search-button:hover {
+      background-color: #357ae8;
+    }
+
+    .support-button {
+      background-color: #34A853;
+    }
+
+    .support-button:hover {
+      background-color: #2c9f42;
+    }
+
+    #status {
+      margin-top: 25px;
+      font-style: italic;
+      color: #666;
+      font-size: 15px;
+      min-height: 1.5em;
+    }
+
+    #results {
+      margin-top: 25px;
+      text-align: left;
+      border-top: 1px solid #eee;
+      padding-top: 25px;
+    }
+
+    .result-item {
+      margin-bottom: 15px;
+      font-size: 17px;
+      word-wrap: break-word;
+    }
+
+    .result-item strong {
+      color: #333;
+    }
+
+    #footer {
+      margin-top: 35px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+      font-size: 14px;
+      font-style: italic;
+      color: #999;
+    }
+
+    #pages-container {
+      margin-top: 25px;
+      text-align: left;
+      border-top: 1px solid #eee;
+      padding-top: 20px;
+      font-size: 16px;
+    }
+
+    .pages-list ul {
+      list-style-type: none;
+      padding-left: 0;
+      margin-top: 10px;
+    }
+
+    .pages-list li {
+      margin-bottom: 8px;
+    }
+
+    .pages-list a {
+      text-decoration: none;
+      color: #0077cc;
+    }
+
+    .pages-list a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 1024px) {
+      body {
+        padding: 0;
+        display: block;
+      }
+
+      #container {
+        max-width: 100%;
+        border-radius: 0;
+        box-shadow: none;
+        min-height: 100vh;
+        padding: 40px 30px;
+      }
+
+      #logo {
+        max-width: 360px;
+        margin-bottom: 60px;
+      }
+
+      #company-name {
+        font-size: 36px;
+        margin-bottom: 40px;
+      }
+
+      h2.page-title {
+        font-size: 44px;
+        margin-bottom: 50px;
+      }
+
+      input[type="text"] {
+        font-size: 34px;
+        padding: 30px;
+        margin-bottom: 40px;
+      }
+
+      #button-group {
+        gap: 30px;
+      }
+
+      .btn {
+        font-size: 36px;
+        padding: 32px;
+      }
+
+      #status {
+        font-size: 30px;
+        margin-top: 50px;
+      }
+
+      #results {
+        margin-top: 50px;
+        padding-top: 50px;
+      }
+
+      .result-item {
+        font-size: 34px;
+        margin-bottom: 30px;
+      }
+
+      #pages-container {
+        font-size: 32px;
+        margin-top: 50px;
+        padding-top: 40px;
+      }
+
+      .pages-list li {
+        margin-bottom: 16px;
+      }
+
+      #footer {
+        font-size: 28px;
+        margin-top: 70px;
+        padding-top: 40px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container">
+    <div id="company-name">CÔNG TY CỔ PHẦN CHẾ TẠO ĐIỆN CƠ HEM</div>
+    <img src="https://hem.com.vn/wp-content/uploads/2024/04/Blue-Logo.png" alt="Logo Công ty HEM" id="logo" onerror="this.style.display='none'">
+    <h2 class="page-title">Tra cứu thông tin thiết bị</h2>
+    <input type="text" id="deviceIdInput" placeholder="Nhập mã số thiết bị vào đây...">
+    <div id="button-group">
+      <button id="search-button" class="btn" onclick="searchDevice()">Tra cứu</button>
+      <a href="#" id="support-link" class="btn support-button">Hỗ trợ / Báo hỏng</a>
+    </div>
+    <div id="status"></div>
+    <div id="results">Mã số thiết bị được in trên nhãn dán, thường dán ở góc trên bên trái của thiết bị, ví dụ: I123.</div>
+    <div id="pages-container"></div>
+    <div id="footer">Ứng dụng được phát triển bởi Bộ phận Công nghệ thông tin HEM EMM</div>
+  </div>
+  <script>
+    function searchDevice() {
+      const deviceId = document.getElementById('deviceIdInput').value.trim();
+      const statusDiv = document.getElementById('status');
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '';
+      if (!deviceId) {
+        statusDiv.innerHTML = 'Vui lòng nhập mã số thiết bị.';
+        return;
+      }
+      statusDiv.innerHTML = 'Đang tìm kiếm...';
+      google.script.run
+        .withSuccessHandler(displayResults)
+        .withFailureHandler(displayError)
+        .searchDeviceInfo(deviceId);
+    }
+
+    function displayResults(result) {
+      const statusDiv = document.getElementById('status');
+      const resultsDiv = document.getElementById('results');
+      statusDiv.innerHTML = '';
+      const notFoundMessage = '<p style="color:red; font-size: 17px;">Không tìm được thiết bị có mã số tương ứng / Thiết bị đã thanh lý.</p>';
+      if (result.status === 'success' && result.type) {
+        let html = '<div class="result-item"><strong>Loại thiết bị:</strong> ' + result.type + '</div>';
+        html += '<div class="result-item"><strong>Người quản lý / sử dụng:</strong> ' + (result.user || 'N/A') + '</div>';
+        html += '<div class="result-item"><strong>Mô tả:</strong> ' + (result.description || 'N/A') + '</div>';
+        resultsDiv.innerHTML = html;
+      } else {
+        resultsDiv.innerHTML = notFoundMessage;
+      }
+    }
+
+    function displayError(error) {
+      const statusDiv = document.getElementById('status');
+      const resultsDiv = document.getElementById('results');
+      statusDiv.innerHTML = '';
+      resultsDiv.innerHTML = '<p style="color:red; font-size: 17px;">Đã xảy ra lỗi: ' + error.message + '</p>';
+    }
+
+    function openSupportForm() {
+      const deviceId = document.getElementById('deviceIdInput').value.trim();
+      if (!deviceId) {
+        document.getElementById('status').innerText = 'Vui lòng nhập mã thiết bị trước khi yêu cầu hỗ trợ.';
+        return;
+      }
+      const baseFormUrl = 'https://docs.google.com/forms/d/e/1FAIpQLScfdQ2hwoy86Ljjwqj8_9HxopsLuII5C-baMKPwJuWm9S03yA/viewform?usp=pp_url';
+      const finalUrl = `${baseFormUrl}&entry.621171861=${encodeURIComponent(deviceId)}`;
+      window.open(finalUrl, '_blank');
+    }
+
+    function displayPageLinks(pages) {
+      const container = document.getElementById('pages-container');
+      // Lọc ra chỉ những trang có visible = true để hiển thị
+      const visiblePages = pages.filter(page => page.visible);
+      
+      if (!visiblePages || visiblePages.length === 0) return;
+
+      let html = '<div class="pages-list">';
+      html += '<strong>Các trang khác:</strong><ul>';
+      visiblePages.forEach(page => {
+        // THAY ĐỔI QUAN TRỌNG: Thêm target="_top" vào đây
+        html += `<li><a href="${page.url}" target="_top">${page.title}</a></li>`;
+      });
+      html += '</ul></div>';
+      container.innerHTML = html;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const inputField = document.getElementById('deviceIdInput');
+      const supportLink = document.getElementById('support-link');
+      const deviceIdFromUrl = '<?= initialId ?>';
+
+      if (deviceIdFromUrl) {
+        inputField.value = deviceIdFromUrl;
+        searchDevice();
+      }
+
+      inputField.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          searchDevice();
+        }
+      });
+
+      supportLink.addEventListener('click', function(event) {
+        event.preventDefault();
+        openSupportForm();
+      });
+
+      google.script.run.withSuccessHandler(displayPageLinks).getPublishedPages();
+    });
+  </script>
+</body>
+
+</html>
