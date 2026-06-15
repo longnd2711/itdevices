@@ -1,0 +1,133 @@
+/****************************************************************
+ * File: Code.gs (Đã cập nhật)
+ * Chứa toàn bộ logic phía máy chủ (server-side).
+ ****************************************************************/
+
+/**
+ * Hàm chính, định tuyến các yêu cầu GET.
+ * @param {object} e Đối tượng sự kiện chứa tham số URL.
+ */
+function doGet(e) {
+  // Nếu URL có tham số 'page', hiển thị trang nội dung.
+  if (e.parameter && e.parameter.page) {
+    return renderContentPage(e.parameter.page);
+  }
+  // Nếu không, hiển thị trang tra cứu thiết bị.
+  else {
+    return renderLookupPage(e);
+  }
+}
+
+/**
+ * Hiển thị trang tra cứu thiết bị chính (template: index.html).
+ */
+function renderLookupPage(e) {
+  const template = HtmlService.createTemplateFromFile('index');
+  template.initialId = (e.parameter && e.parameter.id) ? e.parameter.id : '';
+  return template.evaluate().setTitle('Ứng dụng Tra cứu Thiết bị');
+}
+
+/**
+ * Hiển thị một trang nội dung HTML (template: page.html).
+ * @param {string} pageUrl - Mã định danh url từ cột A.
+ */
+function renderContentPage(pageUrl) {
+  try {
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Pages");
+    if (!sheet) throw new Error("Không tìm thấy sheet 'Pages'.");
+
+    // Lấy dữ liệu từ 4 cột A, B, C, D
+    const data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 4).getValues();
+    
+    // Tìm hàng có url (cột A) khớp.
+    // Đã loại bỏ điều kiện kiểm tra cột Visible (cột C) tại đây.
+    // Điều này cho phép truy cập trang trực tiếp qua URL ngay cả khi nó bị ẩn.
+    const pageData = data.find(row => row[0] === pageUrl);
+
+    if (pageData) {
+      const template = HtmlService.createTemplateFromFile('page');
+      template.pageContent = pageData[1]; // Cột B: Content
+      template.pageTitle = pageData[3];   // Cột D: Title (tiêu đề hiển thị)
+      template.appUrl = ScriptApp.getService().getUrl(); // URL để quay lại
+      return template.evaluate().setTitle(pageData[3]);
+    } else {
+      const errorMessage = `<h1>404 - Trang không tồn tại</h1><p>Không tìm thấy trang với đường dẫn "${pageUrl}".</p><a href="${ScriptApp.getService().getUrl()}">Quay lại trang chính</a>`;
+      return HtmlService.createHtmlOutput(errorMessage).setTitle("Lỗi 404");
+    }
+  } catch (err) {
+    return HtmlService.createHtmlOutput(`<p>Đã xảy ra lỗi: ${err.message}</p>`);
+  }
+}
+
+/**
+ * Lấy danh sách TOÀN BỘ các trang và trạng thái hiển thị của chúng.
+ * Được gọi từ JavaScript phía client.
+ * Client sẽ dựa vào thuộc tính 'visible' để quyết định có hiển thị link hay không.
+ * @returns {Array<Object>} Mảng các đối tượng trang { url: ..., title: ..., visible: ... }.
+ */
+function getPublishedPages() {
+  try {
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Pages');
+    if (!sheet) return [];
+
+    // Lấy dữ liệu từ 4 cột A, B, C, D
+    const data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 4).getValues();
+    const pages = [];
+    const webAppUrl = ScriptApp.getService().getUrl();
+
+    data.forEach(row => {
+      const pageUrl = row[0];       // Cột A: url
+      const isVisible = row[2];     // Cột C: Visible (true/false)
+      const displayTitle = row[3];  // Cột D: Title
+
+      // Chỉ cần có url và tiêu đề là sẽ thêm vào danh sách
+      if (pageUrl && displayTitle) {
+        pages.push({
+          // Link sẽ có dạng ?page=url_dinh_danh
+          url: `${webAppUrl}?page=${encodeURIComponent(pageUrl)}`,
+          // Văn bản hiển thị cho link là tiêu đề từ cột D
+          title: displayTitle,
+          // Thêm trạng thái visible để client xử lý việc hiển thị
+          visible: isVisible === true 
+        });
+      }
+    });
+    return pages;
+  } catch (e) {
+    return []; // Trả về mảng rỗng nếu có lỗi
+  }
+}
+
+/**
+ * Hàm tìm kiếm thông tin thiết bị gốc của bạn.
+ */
+function searchDeviceInfo(deviceId) {
+  if (!deviceId) {
+    return { status: 'error', message: 'Vui lòng nhập ID thiết bị.' };
+  }
+  try {
+    const sheetName = 'Devices';
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+    if (!sheet) {
+      return { status: 'error', message: 'Không tìm thấy trang tính có tên "' + sheetName + '".' };
+    }
+    const dataRange = sheet.getRange('A2:G' + sheet.getLastRow());
+    const data = dataRange.getValues();
+    for (var i = 0; i < data.length; i++) {
+      if (data[i][0].toString().trim().toLowerCase() === deviceId.trim().toLowerCase()) {
+        const deviceType = data[i][2];
+        const user = data[i][3];
+        const description = data[i][6];
+        return {
+          status: 'success',
+          type: deviceType,
+          user: user,
+          description: description
+        };
+      }
+    }
+    return { status: 'not_found', message: 'Không tìm thấy thiết bị với ID: ' + deviceId };
+  } catch (e) {
+    return { status: 'error', message: 'Đã xảy ra lỗi phía máy chủ: ' + e.toString() };
+  }
+}
