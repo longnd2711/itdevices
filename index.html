@@ -310,7 +310,7 @@
         document.getElementById('status').innerText = 'Vui lòng nhập mã thiết bị trước khi yêu cầu hỗ trợ.';
         return;
       }
-      const baseFormUrl = 'https://docs.google.com/forms/d/e/1FAIpQLScfdQ2hwoy86Ljjwqj8_9HxopsLuII5C-baMKPwJuWm9S03yA/viewform?usp=pp_url';
+      const baseFormUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSdq4dOqfso_jYJudquLU7SNNN39EX0fPLzWWG9-dhDjWWlrHQ/viewform?usp=dialog';
       const finalUrl = `${baseFormUrl}&entry.621171861=${encodeURIComponent(deviceId)}`;
       window.open(finalUrl, '_blank');
     }
