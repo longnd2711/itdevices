@@ -111,13 +111,13 @@ function searchDeviceInfo(deviceId) {
     if (!sheet) {
       return { status: 'error', message: 'Không tìm thấy trang tính có tên "' + sheetName + '".' };
     }
-    const dataRange = sheet.getRange('A2:G' + sheet.getLastRow());
+    const dataRange = sheet.getRange('A2:Q' + sheet.getLastRow());
     const data = dataRange.getValues();
     for (var i = 0; i < data.length; i++) {
       if (data[i][0].toString().trim().toLowerCase() === deviceId.trim().toLowerCase()) {
         const deviceType = data[i][2];
-        const user = data[i][3];
-        const description = data[i][6];
+        const user = data[i][4];
+        const description = data[i][16];
         return {
           status: 'success',
           type: deviceType,
