@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tra cứu thông tin thiết bị - HEM</title>
   <style>
+    /* --- CSS GIAO DIỆN (GIỮ NGUYÊN VÀ TỐI ƯU) --- */
     html {
       scroll-behavior: smooth;
     }
@@ -175,81 +176,22 @@
       text-decoration: underline;
     }
 
-    /* Media Queries cho thiết bị di động (Giữ nguyên từ bản cũ) */
+    /* --- MEDIA QUERIES CHO DI ĐỘNG --- */
     @media (max-width: 1024px) {
-      body {
-        padding: 0;
-        display: block;
-      }
-
-      #container {
-        max-width: 100%;
-        border-radius: 0;
-        box-shadow: none;
-        min-height: 100vh;
-        padding: 40px 30px;
-      }
-
-      #logo {
-        max-width: 360px;
-        margin-bottom: 60px;
-      }
-
-      #company-name {
-        font-size: 36px;
-        margin-bottom: 40px;
-      }
-
-      h2.page-title {
-        font-size: 44px;
-        margin-bottom: 50px;
-      }
-
-      input[type="text"] {
-        font-size: 34px;
-        padding: 30px;
-        margin-bottom: 40px;
-      }
-
-      #button-group {
-        gap: 30px;
-      }
-
-      .btn {
-        font-size: 36px;
-        padding: 32px;
-      }
-
-      #status {
-        font-size: 30px;
-        margin-top: 50px;
-      }
-
-      #results {
-        margin-top: 50px;
-        padding-top: 50px;
-      }
-
-      .result-item {
-        font-size: 34px;
-        margin-bottom: 30px;
-      }
-
-      #pages-container {
-        font-size: 32px;
-        margin-top: 50px;
-        padding-top: 40px;
-      }
-
-      .pages-list li {
-        margin-bottom: 16px;
-      }
-
-      #footer {
-        font-size: 28px;
-        margin-top: 70px;
-        padding-top: 40px;
-      }
+      body { padding: 0; display: block; }
+      #container { max-width: 100%; border-radius: 0; box-shadow: none; min-height: 100vh; padding: 40px 30px; }
+      #logo { max-width: 360px; margin-bottom: 60px; }
+      #company-name { font-size: 36px; margin-bottom: 40px; }
+      h2.page-title { font-size: 44px; margin-bottom: 50px; }
+      input[type="text"] { font-size: 34px; padding: 30px; margin-bottom: 40px; }
+      #button-group { gap: 30px; }
+      .btn { font-size: 36px; padding: 32px; }
+      #status { font-size: 30px; margin-top: 50px; }
+      #results { margin-top: 50px; padding-top: 50px; }
+      .result-item { font-size: 34px; margin-bottom: 30px; }
+      #pages-container { font-size: 32px; margin-top: 50px; padding-top: 40px; }
+      .pages-list li { margin-bottom: 16px; }
+      #footer { font-size: 28px; margin-top: 70px; padding-top: 40px; }
     }
   </style>
 </head>
@@ -257,10 +199,10 @@
 <body>
   <div id="container">
     <div id="company-name">CÔNG TY CỔ PHẦN CHẾ TẠO ĐIỆN CƠ HEM</div>
-    <img src="https://hem.com.vn/wp-content/uploads/2024/04/Blue-Logo.png" alt="Logo Công ty HEM" id="logo" onerror="this.style.display='none'">
+    <img src="https://hem.com.vn/wp-content/uploads/2024/04/Blue-Logo.png" alt="Logo HEM" id="logo" onerror="this.style.display='none'">
+    
     <h2 class="page-title">Tra cứu thông tin thiết bị</h2>
     
-    <!-- Ô nhập liệu linh hoạt: Mã thiết bị hoặc Link QR -->
     <input type="text" id="deviceIdInput" placeholder="Nhập mã số hoặc dán link quét được...">
     
     <div id="button-group">
@@ -269,13 +211,14 @@
     </div>
 
     <div id="status"></div>
-    <div id="results">Mã số thiết bị được in trên nhãn dán, thường dán ở góc trên bên trái của thiết bị, ví dụ: I123.</div>
+    <div id="results">Mã số thiết bị được in trên nhãn dán, ví dụ: I123.</div>
     
-    <!-- Danh sách các trang nội dung tĩnh trên GitHub -->
+    <!-- KHU VỰC THÊM/BỚT TRANG NỘI DUNG TĨNH -->
     <div id="pages-container">
       <div class="pages-list">
         <strong>Thông tin hữu ích:</strong>
         <ul>
+          <!-- Thêm link mới bằng cách copy dòng li bên dưới và sửa href -->
           <li><a href="huong-dan.html">Hướng dẫn sử dụng thiết bị</a></li>
           <li><a href="quy-dinh.html">Quy định quản lý tài sản</a></li>
         </ul>
@@ -286,19 +229,19 @@
   </div>
 
   <script>
-    // Link Web App Google Apps Script của bạn
+    // --- CẤU HÌNH ---
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxhgQXWtrvCIaVJejEDoEbbD5eWfpA6KvvwouCAYlA_PjlfyXi14R0QNh8AQxPNMxeHkg/exec";
 
     /**
-     * Hàm tách mã thiết bị từ chuỗi bất kỳ
-     * Nếu là link chứa /21/ID -> lấy ID
-     * Nếu là mã thuần -> trả về chính nó
+     * Tách mã thiết bị từ chuỗi bất kỳ có chứa /21/
+     * Hoạt động với cả link: [link]/01/0893.../21/I123
      */
     function extractId(input) {
+      if (!input) return "";
       const value = input.trim();
       if (value.includes('/21/')) {
         try {
-          // Lấy phần phía sau /21/ và loại bỏ các tham số phụ như ? hoặc #
+          // Chia làm 2 phần tại /21/, lấy phần sau, rồi bỏ các ký tự thừa như ? hay #
           return value.split('/21/')[1].split('?')[0].split('#')[0];
         } catch (e) {
           return value;
@@ -308,12 +251,11 @@
     }
 
     /**
-     * Hàm gọi API để tìm kiếm thông tin
+     * Gọi API Google Apps Script để tìm kiếm
      */
     async function searchDevice() {
       const inputField = document.getElementById('deviceIdInput');
-      const rawValue = inputField.value;
-      const deviceId = extractId(rawValue);
+      const deviceId = extractId(inputField.value);
       const statusDiv = document.getElementById('status');
       const resultsDiv = document.getElementById('results');
 
@@ -322,42 +264,39 @@
         return;
       }
 
-      // Cập nhật lại ô input để người dùng thấy mã thiết bị đã được lọc
-      inputField.value = deviceId;
-      
+      inputField.value = deviceId; // Hiển thị mã sạch cho người dùng thấy
       statusDiv.innerHTML = 'Đang truy xuất dữ liệu...';
       resultsDiv.innerHTML = '';
 
       try {
-        // Sử dụng fetch để gọi Web App Google Apps Script
         const response = await fetch(`${WEB_APP_URL}?id=${encodeURIComponent(deviceId)}`);
         const result = await response.json();
 
         statusDiv.innerHTML = '';
 
         if (result.status === 'success') {
-          let html = `<div class="result-item"><strong>Loại thiết bị:</strong> ${result.type || 'N/A'}</div>`;
-          html += `<div class="result-item"><strong>Người quản lý / sử dụng:</strong> ${result.user || 'N/A'}</div>`;
-          html += `<div class="result-item"><strong>Mô tả:</strong> ${result.description || 'N/A'}</div>`;
-          resultsDiv.innerHTML = html;
+          resultsDiv.innerHTML = `
+            <div class="result-item"><strong>Loại thiết bị:</strong> ${result.type || 'N/A'}</div>
+            <div class="result-item"><strong>Người quản lý:</strong> ${result.user || 'N/A'}</div>
+            <div class="result-item"><strong>Mô tả:</strong> ${result.description || 'N/A'}</div>
+          `;
         } else {
-          resultsDiv.innerHTML = `<p style="color:red; font-size: 17px;">Không tìm thấy thiết bị: ${deviceId} hoặc thiết bị đã thanh lý.</p>`;
+          resultsDiv.innerHTML = `<p style="color:red; font-size: 17px;">Không tìm thấy mã: ${deviceId}</p>`;
         }
       } catch (error) {
         statusDiv.innerHTML = '';
-        resultsDiv.innerHTML = `<p style="color:red; font-size: 17px;">Lỗi kết nối: Không thể truy cập máy chủ dữ liệu.</p>`;
-        console.error('Error:', error);
+        resultsDiv.innerHTML = `<p style="color:red; font-size: 17px;">Lỗi kết nối máy chủ.</p>`;
       }
     }
 
     /**
-     * Mở link Google Form hỗ trợ
+     * Mở Google Form điền sẵn mã thiết bị
      */
     function openSupportForm(event) {
       event.preventDefault();
-      const deviceId = document.getElementById('deviceIdInput').value.trim();
+      const deviceId = extractId(document.getElementById('deviceIdInput').value);
       if (!deviceId) {
-        alert('Vui lòng nhập mã thiết bị trước khi yêu cầu hỗ trợ.');
+        alert('Vui lòng nhập mã thiết bị trước.');
         return;
       }
       const baseFormUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSdq4dOqfso_jYJudquLU7SNNN39EX0fPLzWWG9-dhDjWWlrHQ/viewform?usp=dialog';
@@ -366,35 +305,38 @@
     }
 
     /**
-     * Tự động chạy khi trang web tải xong
+     * Xử lý khi trang web vừa tải xong (Quét QR hoặc link trực tiếp)
      */
     document.addEventListener('DOMContentLoaded', function() {
       const inputField = document.getElementById('deviceIdInput');
-
-      // 1. Kiểm tra nếu URL hiện tại có tham số ?id=...
       const urlParams = new URLSearchParams(window.location.search);
-      let idFromUrl = urlParams.get('id');
+      
+      // 1. Lấy ID từ tham số ?id=... (nếu có)
+      let foundId = urlParams.get('id');
 
-      // 2. Kiểm tra nếu URL hiện tại có chứa đoạn /21/ (Dành cho quét mã trực tiếp)
-      const currentPath = window.location.href;
-      if (currentPath.includes('/21/')) {
-        idFromUrl = extractId(currentPath);
+      // 2. Lấy đường dẫn gốc từ tham số ?q=... (nếu file 404.html gửi qua)
+      const qParam = urlParams.get('q');
+      
+      // 3. Kiểm tra trực tiếp trên link hiện tại (nếu link dạng /21/I123 trực tiếp)
+      const currentUrl = window.location.href;
+
+      if (qParam && qParam.includes('/21/')) {
+        foundId = extractId(qParam);
+      } else if (currentUrl.includes('/21/')) {
+        foundId = extractId(currentUrl);
       }
 
-      if (idFromUrl) {
-        inputField.value = idFromUrl;
+      // Nếu tìm thấy mã, điền vào ô và tự động bấm tra cứu
+      if (foundId) {
+        inputField.value = foundId;
         searchDevice();
       }
 
-      // 3. Lắng nghe phím Enter trong ô nhập liệu
-      inputField.addEventListener('keydown', function(event) {
-        if (event.key === 'Enter') {
-          event.preventDefault();
-          searchDevice();
-        }
+      // Bấm Enter để tra cứu
+      inputField.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') searchDevice();
       });
     });
   </script>
 </body>
-
 </html>
