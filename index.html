@@ -139,7 +139,6 @@
       font-weight: bold;
       font-size: 16px;
       cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
 
     /* --- NÚT BẤM --- */
@@ -166,11 +165,37 @@
     #search-button { background-color: #4285F4; }
     .support-button { background-color: #34A853; }
 
-    /* --- TRẠNG THÁI & KẾT QUẢ --- */
+    /* --- TRẠNG THÁI & KẾT QUẢ (CẬP NHẬT) --- */
     #status { margin-top: 15px; font-size: 14px; color: #666; min-height: 1.2em; }
-    #results { margin-top: 20px; text-align: left; border-top: 1px solid #eee; padding-top: 20px; }
-    .result-item { margin-bottom: 12px; font-size: 16px; line-height: 1.5; color: #444; }
-    .result-item strong { display: block; font-size: 13px; text-transform: uppercase; color: #888; margin-bottom: 2px; }
+    
+    #results {
+      margin-top: 20px;
+      text-align: left;
+      border-top: 1px solid #eee;
+      padding-top: 20px;
+    }
+
+    .result-item {
+      margin-bottom: 15px;
+      font-size: 16px;
+      line-height: 1.6;
+      color: #333;
+    }
+
+    /* Định dạng cho phần in đậm */
+    .result-item strong {
+      color: #000;
+      font-weight: 700;
+    }
+
+    /* Định dạng cho phần mô tả in nghiêng xuống dòng */
+    .description-content {
+      display: block;
+      margin-top: 5px;
+      color: #555;
+      font-style: italic;
+      white-space: pre-wrap; /* Giữ nguyên các dấu xuống dòng trong mô tả */
+    }
 
     #pages-container { margin-top: 20px; text-align: left; border-top: 1px solid #eee; padding-top: 15px; }
     .pages-list a { text-decoration: none; color: #0077cc; font-size: 15px; display: block; padding: 8px 0; }
@@ -198,7 +223,6 @@
     
     <div class="input-wrapper">
       <input type="text" id="deviceIdInput" placeholder="Nhập mã hoặc quét QR..." inputmode="text">
-      <!-- Nút quét mã QR với Icon mới -->
       <button id="scan-trigger" onclick="startScanner()" title="Quét mã QR">
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path d="M4 4h4.832c.552 0 1-.448 1-1s-.448-1-1-1H4C2.895 2 2 2.895 2 4v4.832c0 .552.448 1 1 1s1-.448 1-1V4zm16 0h-4.832c-.552 0-1-.448-1-1s-.448-1 1-1H20c1.105 0 2 .895 2 4v4.832c0 .552.448 1-1 1s-1-.448-1-1V4zM4 20h4.832c.552 0 1 .448 1 1s-.448 1-1 1H4c-1.105 0-2-.895-2-4v-4.832c0-.552.448-1 1-1s1 .448 1 1V20zm16 0h-4.832c-.552 0-1 .448-1 1s-.448 1-1 1H20c1.105 0 2-.895 2-4v-4.832c0-.552-.448-1-1-1s-1 .448-1 1V20zM7 7h4v4H7V7zm6 0h4v4h-4V7zm0 6h4v4h-4v-4zm-6 0h4v4H7v-4z"/>
@@ -247,7 +271,6 @@
     async function startScanner() {
       const modal = document.getElementById('scanner-modal');
       modal.style.display = 'flex';
-      
       html5QrCode = new Html5Qrcode("reader");
       const config = { fps: 15, qrbox: { width: 250, height: 250 } };
 
@@ -263,7 +286,7 @@
           }
         );
       } catch (err) {
-        alert("Lỗi: Không thể truy cập Camera. Hãy đảm bảo bạn đã cấp quyền.");
+        alert("Lỗi: Không thể truy cập Camera.");
         stopScanner();
       }
     }
@@ -282,6 +305,9 @@
       }
     }
 
+    /**
+     * HÀM HIỂN THỊ KẾT QUẢ ĐÃ ĐƯỢC CẬP NHẬT ĐỊNH DẠNG
+     */
     async function searchDevice() {
       const inputField = document.getElementById('deviceIdInput');
       const deviceId = extractId(inputField.value);
@@ -303,11 +329,12 @@
         statusDiv.innerHTML = '';
 
         if (result.status === 'success') {
-          resultsDiv.innerHTML = `
-            <div class="result-item"><strong>Loại thiết bị</strong> ${result.type || 'N/A'}</div>
-            <div class="result-item"><strong>Người quản lý</strong> ${result.user || 'N/A'}</div>
-            <div class="result-item"><strong>Mô tả chi tiết</strong> ${result.description || 'N/A'}</div>
-          `;
+          // Xây dựng nội dung hiển thị theo yêu cầu mới
+          let html = `<div class="result-item">Loại thiết bị: <strong>${result.type || 'N/A'}</strong></div>`;
+          html += `<div class="result-item">Sử dụng/Quản lý: <strong>${result.user || 'N/A'}</strong></div>`;
+          html += `<div class="result-item">Mô tả / Thông số kỹ thuật:<br><span class="description-content"><em>${result.description || 'Chưa có mô tả'}</em></span></div>`;
+          
+          resultsDiv.innerHTML = html;
         } else {
           resultsDiv.innerHTML = `<p style="color:#d93025; font-weight:bold;">Mã ${deviceId} không tồn tại trên hệ thống.</p>`;
         }
