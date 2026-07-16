@@ -5,8 +5,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tra cứu thông tin thiết bị - HEM</title>
+  <!-- Load thư viện html5-qrcode để hỗ trợ quét QR trên trình duyệt -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  
   <style>
-    /* --- CSS GIAO DIỆN (GIỮ NGUYÊN VÀ TỐI ƯU) --- */
     html {
       scroll-behavior: smooth;
     }
@@ -57,10 +59,16 @@
       margin: 0 0 25px;
     }
 
+    .input-wrapper {
+      position: relative;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
     input[type="text"] {
       width: 100%;
       padding: 15px;
-      margin-bottom: 20px;
+      padding-right: 55px; /* Để trống không gian cho nút scan */
       border: 1px solid #ccc;
       border-radius: 8px;
       font-size: 17px;
@@ -71,6 +79,32 @@
       outline: none;
       border-color: #4285F4;
       box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.25);
+    }
+
+    #scan-btn {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      transition: color 0.2s;
+    }
+
+    #scan-btn:hover {
+      color: #4285F4;
+    }
+
+    #scan-btn svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
     }
 
     #button-group {
@@ -176,14 +210,71 @@
       text-decoration: underline;
     }
 
-    /* --- MEDIA QUERIES CHO DI ĐỘNG --- */
+    #qr-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    #qr-modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      position: relative;
+    }
+
+    #qr-reader {
+      width: 100%;
+      margin-top: 10px;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    #qr-error {
+      color: #e74c3c;
+      margin-top: 15px;
+      font-size: 14px;
+    }
+
+    .close-modal-btn {
+      margin-top: 20px;
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .close-modal-btn:hover {
+      background-color: #c0392b;
+    }
+
     @media (max-width: 1024px) {
       body { padding: 0; display: block; }
       #container { max-width: 100%; border-radius: 0; box-shadow: none; min-height: 100vh; padding: 40px 30px; }
       #logo { max-width: 360px; margin-bottom: 60px; }
       #company-name { font-size: 36px; margin-bottom: 40px; }
       h2.page-title { font-size: 44px; margin-bottom: 50px; }
-      input[type="text"] { font-size: 34px; padding: 30px; margin-bottom: 40px; }
+      
+      .input-wrapper { margin-bottom: 40px; }
+      input[type="text"] { font-size: 34px; padding: 30px; padding-right: 100px; }
+      #scan-btn { right: 20px; }
+      #scan-btn svg { width: 48px; height: 48px; }
+
       #button-group { gap: 30px; }
       .btn { font-size: 36px; padding: 32px; }
       #status { font-size: 30px; margin-top: 50px; }
@@ -192,6 +283,10 @@
       #pages-container { font-size: 32px; margin-top: 50px; padding-top: 40px; }
       .pages-list li { margin-bottom: 16px; }
       #footer { font-size: 28px; margin-top: 70px; padding-top: 40px; }
+
+      #qr-modal-content { padding: 30px; max-width: 90%; }
+      .close-modal-btn { font-size: 32px; padding: 20px; margin-top: 30px; border-radius: 12px;}
+      #qr-error { font-size: 28px; }
     }
   </style>
 </head>
@@ -203,7 +298,16 @@
     
     <h2 class="page-title">Tra cứu thông tin thiết bị</h2>
     
-    <input type="text" id="deviceIdInput" placeholder="Quét mã QR hoặc Nhập mã số">
+    <!-- Input Wrapper chứa ô nhập và nút Scan -->
+    <div class="input-wrapper">
+      <input type="text" id="deviceIdInput" placeholder="Quét mã QR hoặc Nhập mã số">
+      <button id="scan-btn" onclick="openQrScanner()" title="Quét mã QR">
+        <!-- SVG Icon QR Code -->
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 11H5V5H11V3H4C3.44772 3 3 3.44772 3 4V11ZM3 13H5V19H11V21H4C3.44772 21 3 20.5523 3 20V13ZM21 13H19V19H13V21H20C20.5523 21 21 20.5523 21 20V13ZM21 11H19V5H13V3H20C20.5523 3 21 3.44772 21 4V11ZM7 7H10V10H7V7ZM14 7H17V10H14V7ZM7 14H10V17H7V14ZM14 14H17V17H14V14Z"/>
+        </svg>
+      </button>
+    </div>
     
     <div id="button-group">
       <button id="search-button" class="btn" onclick="searchDevice()">Tra cứu</button>
@@ -218,7 +322,6 @@
       <div class="pages-list">
         <strong>Thông tin hữu ích:</strong>
         <ul>
-          <!-- Thêm link mới bằng cách copy dòng li bên dưới và sửa href -->
           <li><a href="huong-dan.html">Hướng dẫn sử dụng thiết bị</a></li>
           <li><a href="quy-dinh.html">Quy định quản lý tài sản</a></li>
         </ul>
@@ -228,20 +331,29 @@
     <div id="footer">Ứng dụng đang trong quá trình phát triển, rất mong nhận được ý kiến của toàn thể các anh/chị.</div>
   </div>
 
+  <!-- Popup Modal Quét QR -->
+  <div id="qr-modal">
+    <div id="qr-modal-content">
+      <h3 style="margin-top: 0;">Quét mã QR</h3>
+      <div id="qr-reader"></div>
+      <div id="qr-error"></div>
+      <button class="close-modal-btn" onclick="closeQrScanner()">Đóng</button>
+    </div>
+  </div>
+
   <script>
     // --- CẤU HÌNH ---
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxhgQXWtrvCIaVJejEDoEbbD5eWfpA6KvvwouCAYlA_PjlfyXi14R0QNh8AQxPNMxeHkg/exec";
+    let html5QrCode = null; // Biến lưu trữ instance của máy quét
 
     /**
      * Tách mã thiết bị từ chuỗi bất kỳ có chứa /21/
-     * Hoạt động với cả link: [link]/01/0893.../21/I123
      */
     function extractId(input) {
       if (!input) return "";
       const value = input.trim();
       if (value.includes('/21/')) {
         try {
-          // Chia làm 2 phần tại /21/, lấy phần sau, rồi bỏ các ký tự thừa như ? hay #
           return value.split('/21/')[1].split('?')[0].split('#')[0];
         } catch (e) {
           return value;
@@ -264,7 +376,7 @@
         return;
       }
 
-      inputField.value = deviceId; // Hiển thị mã sạch cho người dùng thấy
+      inputField.value = deviceId; // Hiển thị mã sạch
       statusDiv.innerHTML = 'Đang truy xuất dữ liệu...';
       resultsDiv.innerHTML = '';
 
@@ -296,7 +408,7 @@
       event.preventDefault();
       const deviceId = extractId(document.getElementById('deviceIdInput').value);
       if (!deviceId) {
-        alert('Vui lòng nhập mã thiết bị trước.');
+        showMessageBox('Vui lòng nhập mã thiết bị trước.');
         return;
       }
       const baseFormUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSdq4dOqfso_jYJudquLU7SNNN39EX0fPLzWWG9-dhDjWWlrHQ/viewform?usp=dialog';
@@ -305,19 +417,77 @@
     }
 
     /**
-     * Xử lý khi trang web vừa tải xong (Quét QR hoặc link trực tiếp)
+     * Hàm hiển thị thông báo thay thế alert()
+     */
+    function showMessageBox(msg) {
+        const statusDiv = document.getElementById('status');
+        statusDiv.innerHTML = `<span style="color: red;">${msg}</span>`;
+    }
+
+    /**
+     * Mở Popup và khởi động Camera Quét QR
+     */
+    function openQrScanner() {
+      const modal = document.getElementById('qr-modal');
+      const errorDiv = document.getElementById('qr-error');
+      
+      modal.style.display = 'flex';
+      errorDiv.innerText = ''; // Xóa lỗi cũ
+
+      // Nếu đã khởi tạo rồi thì dùng lại
+      if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode("qr-reader");
+      }
+
+      // Xin quyền và bật camera sau (environment)
+      html5QrCode.start(
+        { facingMode: "environment" },
+        {
+          fps: 10,    // Tốc độ quét 10 frame/s
+          qrbox: { width: 250, height: 250 } // Khu vực lấy nét
+        },
+        (decodedText, decodedResult) => {
+          // KHI QUÉT THÀNH CÔNG
+          closeQrScanner(); // Tắt popup và camera
+          document.getElementById('deviceIdInput').value = decodedText;
+          searchDevice(); // Tự động tra cứu
+        },
+        (errorMessage) => {
+          // Bỏ qua lỗi parse, vì hàm này gọi liên tục khi không tìm thấy QR
+        }
+      ).catch((err) => {
+        // Lỗi khi từ chối quyền camera hoặc thiết bị không có camera
+        errorDiv.innerText = "Không thể truy cập Camera. Vui lòng cấp quyền chụp ảnh/quay phim cho trình duyệt.";
+        console.error("Lỗi Camera:", err);
+      });
+    }
+
+    /**
+     * Tắt Popup và dừng Camera
+     */
+    function closeQrScanner() {
+      const modal = document.getElementById('qr-modal');
+      if (html5QrCode && html5QrCode.isScanning) {
+        html5QrCode.stop().then(() => {
+          modal.style.display = 'none';
+        }).catch((err) => {
+          console.error("Lỗi khi dừng camera:", err);
+          modal.style.display = 'none';
+        });
+      } else {
+        modal.style.display = 'none';
+      }
+    }
+
+    /**
+     * Xử lý khi trang web vừa tải xong
      */
     document.addEventListener('DOMContentLoaded', function() {
       const inputField = document.getElementById('deviceIdInput');
       const urlParams = new URLSearchParams(window.location.search);
       
-      // 1. Lấy ID từ tham số ?id=... (nếu có)
       let foundId = urlParams.get('id');
-
-      // 2. Lấy đường dẫn gốc từ tham số ?q=... (nếu file 404.html gửi qua)
       const qParam = urlParams.get('q');
-      
-      // 3. Kiểm tra trực tiếp trên link hiện tại (nếu link dạng /21/I123 trực tiếp)
       const currentUrl = window.location.href;
 
       if (qParam && qParam.includes('/21/')) {
@@ -326,13 +496,11 @@
         foundId = extractId(currentUrl);
       }
 
-      // Nếu tìm thấy mã, điền vào ô và tự động bấm tra cứu
       if (foundId) {
         inputField.value = foundId;
         searchDevice();
       }
 
-      // Bấm Enter để tra cứu
       inputField.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') searchDevice();
       });
