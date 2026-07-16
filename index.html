@@ -1,47 +1,400 @@
-function doGet(e) {
-  const action = e.parameter.action;
-  
-  // API lấy thông tin thiết bị
-  if (action === 'search') {
-    const deviceId = e.parameter.id;
-    const result = searchDeviceInfo(deviceId);
-    return ContentService.createTextOutput(JSON.stringify(result))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-  
-  // API lấy danh sách các trang (Pages)
-  if (action === 'getPages') {
-    const pages = getPublishedPages();
-    return ContentService.createTextOutput(JSON.stringify(pages))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}
+<!DOCTYPE html>
+<html lang="vi">
 
-// Giữ nguyên hàm searchDeviceInfo và getPublishedPages của bạn
-// Nhưng lưu ý: Trong getPublishedPages, hãy sửa URL để nó trỏ về link GitHub Pages của bạn thay vì ScriptApp.getUrl()
-function searchDeviceInfo(deviceId) {
-  if (!deviceId) return { status: 'error', message: 'No ID' };
-  try {
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Devices');
-    const data = sheet.getRange('A2:Q' + sheet.getLastRow()).getValues();
-    for (var i = 0; i < data.length; i++) {
-      if (data[i][0].toString().trim().toLowerCase() === deviceId.trim().toLowerCase()) {
-        return {
-          status: 'success',
-          type: data[i][2],
-          user: data[i][4],
-          description: data[i][16]
-        };
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tra cứu thông tin thiết bị - HEM</title>
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #f0f2f5;
+      margin: 0;
+      padding: 20px 15px;
+      box-sizing: border-box;
+    }
+
+    #container {
+      width: 100%;
+      max-width: 500px;
+      padding: 30px;
+      background-color: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      box-sizing: border-box;
+    }
+
+    #company-name {
+      font-weight: bold;
+      text-transform: uppercase;
+      color: #1c3d5a;
+      font-size: 22px;
+      margin-bottom: 20px;
+      white-space: nowrap;
+    }
+
+    #logo {
+      width: 100%;
+      max-width: 180px;
+      height: auto;
+      margin-bottom: 30px;
+    }
+
+    h2.page-title {
+      color: #ff6622;
+      font-size: 24px;
+      font-weight: bold;
+      margin: 0 0 25px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 15px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 17px;
+      box-sizing: border-box;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #4285F4;
+      box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.25);
+    }
+
+    #button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    .btn {
+      display: block;
+      padding: 16px;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      text-align: center;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    #search-button {
+      background-color: #4285F4;
+    }
+
+    #search-button:hover {
+      background-color: #357ae8;
+    }
+
+    .support-button {
+      background-color: #34A853;
+    }
+
+    .support-button:hover {
+      background-color: #2c9f42;
+    }
+
+    #status {
+      margin-top: 25px;
+      font-style: italic;
+      color: #666;
+      font-size: 15px;
+      min-height: 1.5em;
+    }
+
+    #results {
+      margin-top: 25px;
+      text-align: left;
+      border-top: 1px solid #eee;
+      padding-top: 25px;
+    }
+
+    .result-item {
+      margin-bottom: 15px;
+      font-size: 17px;
+      word-wrap: break-word;
+    }
+
+    .result-item strong {
+      color: #333;
+    }
+
+    #footer {
+      margin-top: 35px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+      font-size: 14px;
+      font-style: italic;
+      color: #999;
+    }
+
+    #pages-container {
+      margin-top: 25px;
+      text-align: left;
+      border-top: 1px solid #eee;
+      padding-top: 20px;
+      font-size: 16px;
+    }
+
+    .pages-list ul {
+      list-style-type: none;
+      padding-left: 0;
+      margin-top: 10px;
+    }
+
+    .pages-list li {
+      margin-bottom: 8px;
+    }
+
+    .pages-list a {
+      text-decoration: none;
+      color: #0077cc;
+      font-weight: 500;
+    }
+
+    .pages-list a:hover {
+      text-decoration: underline;
+    }
+
+    /* Media Queries cho thiết bị di động (Giữ nguyên từ bản cũ) */
+    @media (max-width: 1024px) {
+      body {
+        padding: 0;
+        display: block;
+      }
+
+      #container {
+        max-width: 100%;
+        border-radius: 0;
+        box-shadow: none;
+        min-height: 100vh;
+        padding: 40px 30px;
+      }
+
+      #logo {
+        max-width: 360px;
+        margin-bottom: 60px;
+      }
+
+      #company-name {
+        font-size: 36px;
+        margin-bottom: 40px;
+      }
+
+      h2.page-title {
+        font-size: 44px;
+        margin-bottom: 50px;
+      }
+
+      input[type="text"] {
+        font-size: 34px;
+        padding: 30px;
+        margin-bottom: 40px;
+      }
+
+      #button-group {
+        gap: 30px;
+      }
+
+      .btn {
+        font-size: 36px;
+        padding: 32px;
+      }
+
+      #status {
+        font-size: 30px;
+        margin-top: 50px;
+      }
+
+      #results {
+        margin-top: 50px;
+        padding-top: 50px;
+      }
+
+      .result-item {
+        font-size: 34px;
+        margin-bottom: 30px;
+      }
+
+      #pages-container {
+        font-size: 32px;
+        margin-top: 50px;
+        padding-top: 40px;
+      }
+
+      .pages-list li {
+        margin-bottom: 16px;
+      }
+
+      #footer {
+        font-size: 28px;
+        margin-top: 70px;
+        padding-top: 40px;
       }
     }
-    return { status: 'not_found' };
-  } catch (e) {
-    return { status: 'error', message: e.toString() };
-  }
-}
+  </style>
+</head>
 
-function getPublishedPages() {
-  // Giữ nguyên logic lấy data từ sheet "Pages"
-  // Trả về mảng các object [{url, title, visible}]
-  // ... (copy từ code cũ của bạn)
-}
+<body>
+  <div id="container">
+    <div id="company-name">CÔNG TY CỔ PHẦN CHẾ TẠO ĐIỆN CƠ HEM</div>
+    <img src="https://hem.com.vn/wp-content/uploads/2024/04/Blue-Logo.png" alt="Logo Công ty HEM" id="logo" onerror="this.style.display='none'">
+    <h2 class="page-title">Tra cứu thông tin thiết bị</h2>
+    
+    <!-- Ô nhập liệu linh hoạt: Mã thiết bị hoặc Link QR -->
+    <input type="text" id="deviceIdInput" placeholder="Nhập mã số hoặc dán link quét được...">
+    
+    <div id="button-group">
+      <button id="search-button" class="btn" onclick="searchDevice()">Tra cứu</button>
+      <a href="#" id="support-link" class="btn support-button" onclick="openSupportForm(event)">Hỗ trợ / Báo hỏng</a>
+    </div>
+
+    <div id="status"></div>
+    <div id="results">Mã số thiết bị được in trên nhãn dán, thường dán ở góc trên bên trái của thiết bị, ví dụ: I123.</div>
+    
+    <!-- Danh sách các trang nội dung tĩnh trên GitHub -->
+    <div id="pages-container">
+      <div class="pages-list">
+        <strong>Thông tin hữu ích:</strong>
+        <ul>
+          <li><a href="huong-dan.html">Hướng dẫn sử dụng thiết bị</a></li>
+          <li><a href="quy-dinh.html">Quy định quản lý tài sản</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div id="footer">Ứng dụng được phát triển bởi Bộ phận Công nghệ thông tin HEM EMM</div>
+  </div>
+
+  <script>
+    // Link Web App Google Apps Script của bạn
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxhgQXWtrvCIaVJejEDoEbbD5eWfpA6KvvwouCAYlA_PjlfyXi14R0QNh8AQxPNMxeHkg/exec";
+
+    /**
+     * Hàm tách mã thiết bị từ chuỗi bất kỳ
+     * Nếu là link chứa /21/ID -> lấy ID
+     * Nếu là mã thuần -> trả về chính nó
+     */
+    function extractId(input) {
+      const value = input.trim();
+      if (value.includes('/21/')) {
+        try {
+          // Lấy phần phía sau /21/ và loại bỏ các tham số phụ như ? hoặc #
+          return value.split('/21/')[1].split('?')[0].split('#')[0];
+        } catch (e) {
+          return value;
+        }
+      }
+      return value;
+    }
+
+    /**
+     * Hàm gọi API để tìm kiếm thông tin
+     */
+    async function searchDevice() {
+      const inputField = document.getElementById('deviceIdInput');
+      const rawValue = inputField.value;
+      const deviceId = extractId(rawValue);
+      const statusDiv = document.getElementById('status');
+      const resultsDiv = document.getElementById('results');
+
+      if (!deviceId) {
+        statusDiv.innerHTML = 'Vui lòng nhập mã số thiết bị.';
+        return;
+      }
+
+      // Cập nhật lại ô input để người dùng thấy mã thiết bị đã được lọc
+      inputField.value = deviceId;
+      
+      statusDiv.innerHTML = 'Đang truy xuất dữ liệu...';
+      resultsDiv.innerHTML = '';
+
+      try {
+        // Sử dụng fetch để gọi Web App Google Apps Script
+        const response = await fetch(`${WEB_APP_URL}?id=${encodeURIComponent(deviceId)}`);
+        const result = await response.json();
+
+        statusDiv.innerHTML = '';
+
+        if (result.status === 'success') {
+          let html = `<div class="result-item"><strong>Loại thiết bị:</strong> ${result.type || 'N/A'}</div>`;
+          html += `<div class="result-item"><strong>Người quản lý / sử dụng:</strong> ${result.user || 'N/A'}</div>`;
+          html += `<div class="result-item"><strong>Mô tả:</strong> ${result.description || 'N/A'}</div>`;
+          resultsDiv.innerHTML = html;
+        } else {
+          resultsDiv.innerHTML = `<p style="color:red; font-size: 17px;">Không tìm thấy thiết bị: ${deviceId} hoặc thiết bị đã thanh lý.</p>`;
+        }
+      } catch (error) {
+        statusDiv.innerHTML = '';
+        resultsDiv.innerHTML = `<p style="color:red; font-size: 17px;">Lỗi kết nối: Không thể truy cập máy chủ dữ liệu.</p>`;
+        console.error('Error:', error);
+      }
+    }
+
+    /**
+     * Mở link Google Form hỗ trợ
+     */
+    function openSupportForm(event) {
+      event.preventDefault();
+      const deviceId = document.getElementById('deviceIdInput').value.trim();
+      if (!deviceId) {
+        alert('Vui lòng nhập mã thiết bị trước khi yêu cầu hỗ trợ.');
+        return;
+      }
+      const baseFormUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSdq4dOqfso_jYJudquLU7SNNN39EX0fPLzWWG9-dhDjWWlrHQ/viewform?usp=dialog';
+      const finalUrl = `${baseFormUrl}&entry.621171861=${encodeURIComponent(deviceId)}`;
+      window.open(finalUrl, '_blank');
+    }
+
+    /**
+     * Tự động chạy khi trang web tải xong
+     */
+    document.addEventListener('DOMContentLoaded', function() {
+      const inputField = document.getElementById('deviceIdInput');
+
+      // 1. Kiểm tra nếu URL hiện tại có tham số ?id=...
+      const urlParams = new URLSearchParams(window.location.search);
+      let idFromUrl = urlParams.get('id');
+
+      // 2. Kiểm tra nếu URL hiện tại có chứa đoạn /21/ (Dành cho quét mã trực tiếp)
+      const currentPath = window.location.href;
+      if (currentPath.includes('/21/')) {
+        idFromUrl = extractId(currentPath);
+      }
+
+      if (idFromUrl) {
+        inputField.value = idFromUrl;
+        searchDevice();
+      }
+
+      // 3. Lắng nghe phím Enter trong ô nhập liệu
+      inputField.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          searchDevice();
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>
