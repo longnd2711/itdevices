@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Đang chuyển hướng...</title>
+    <script type="text/javascript">
+        // Lưu lại đường dẫn hiện tại mà người dùng đang truy cập (ví dụ: /21/i400)
+        var pathQuery = window.location.pathname + window.location.search + window.location.hash;
+        
+        // Chuyển hướng về trang chủ index.html và đính kèm đường dẫn đó vào tham số "q"
+        // Ví dụ: index.html?q=/21/i400
+        window.location.replace(
+            window.location.protocol + '//' + window.location.hostname + 
+            (window.location.port ? ':' + window.location.port : '') + 
+            '/index.html?q=' + encodeURIComponent(pathQuery)
+        );
+    </script>
+</head>
+<body>
+</body>
+</html>
