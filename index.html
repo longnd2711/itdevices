@@ -3,13 +3,19 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Tra cứu thông tin thiết bị - HEM</title>
-  <!-- Load thư viện html5-qrcode để hỗ trợ quét QR trên trình duyệt -->
-  <script src="https://unpkg.com/html5-qrcode"></script>
-  
   <style>
-    html {
+    /* --- CẤU TRÚC CHUNG --- */
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
       scroll-behavior: smooth;
     }
 
@@ -18,275 +24,171 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
       background-color: #f0f2f5;
-      margin: 0;
-      padding: 20px 15px;
-      box-sizing: border-box;
+      padding: 15px;
     }
 
     #container {
       width: 100%;
-      max-width: 500px;
-      padding: 30px;
+      max-width: 480px;
+      padding: 25px;
       background-color: white;
       border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
       text-align: center;
-      box-sizing: border-box;
     }
 
+    /* --- LOGO & HEADER --- */
     #company-name {
-      font-weight: bold;
+      font-weight: 800;
       text-transform: uppercase;
       color: #1c3d5a;
-      font-size: 22px;
-      margin-bottom: 20px;
-      white-space: nowrap;
+      font-size: 18px;
+      margin-bottom: 15px;
+      line-height: 1.4;
+      /* Đã bỏ nowrap để tránh lỗi tràn màn hình mobile */
     }
 
     #logo {
-      width: 100%;
-      max-width: 180px;
+      width: auto;
+      max-width: 150px;
       height: auto;
-      margin-bottom: 30px;
+      max-height: 80px;
+      margin-bottom: 20px;
     }
 
     h2.page-title {
       color: #ff6622;
-      font-size: 24px;
+      font-size: 22px;
       font-weight: bold;
-      margin: 0 0 25px;
+      margin: 0 0 20px;
     }
 
-    .input-wrapper {
-      position: relative;
-      width: 100%;
-      margin-bottom: 20px;
-    }
-
+    /* --- FORM NHẬP LIỆU --- */
     input[type="text"] {
       width: 100%;
-      padding: 15px;
-      padding-right: 55px; /* Để trống không gian cho nút scan */
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 17px;
-      box-sizing: border-box;
+      padding: 14px;
+      margin-bottom: 15px;
+      border: 2px solid #e1e4e8;
+      border-radius: 10px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+      appearance: none;
     }
 
     input[type="text"]:focus {
       outline: none;
       border-color: #4285F4;
-      box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.25);
-    }
-
-    #scan-btn {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 5px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #666;
-      transition: color 0.2s;
-    }
-
-    #scan-btn:hover {
-      color: #4285F4;
-    }
-
-    #scan-btn svg {
-      width: 24px;
-      height: 24px;
-      fill: currentColor;
     }
 
     #button-group {
       display: flex;
       flex-direction: column;
-      gap: 15px;
-      margin-top: 10px;
+      gap: 12px;
     }
 
     .btn {
       display: block;
-      padding: 16px;
+      padding: 14px;
       color: white;
       border: none;
-      border-radius: 8px;
-      font-size: 18px;
+      border-radius: 10px;
+      font-size: 16px;
       font-weight: bold;
       cursor: pointer;
-      transition: all 0.3s;
       text-decoration: none;
-      text-align: center;
+      transition: opacity 0.2s, transform 0.1s;
     }
 
     .btn:active {
-      transform: scale(0.98);
+      transform: scale(0.97);
+      opacity: 0.9;
     }
 
-    #search-button {
-      background-color: #4285F4;
-    }
+    #search-button { background-color: #4285F4; }
+    .support-button { background-color: #34A853; }
 
-    #search-button:hover {
-      background-color: #357ae8;
-    }
-
-    .support-button {
-      background-color: #34A853;
-    }
-
-    .support-button:hover {
-      background-color: #2c9f42;
-    }
-
+    /* --- TRẠNG THÁI & KẾT QUẢ --- */
     #status {
-      margin-top: 25px;
-      font-style: italic;
+      margin-top: 15px;
+      font-size: 14px;
       color: #666;
-      font-size: 15px;
-      min-height: 1.5em;
+      min-height: 1.2em;
     }
 
     #results {
-      margin-top: 25px;
+      margin-top: 20px;
       text-align: left;
       border-top: 1px solid #eee;
-      padding-top: 25px;
+      padding-top: 20px;
     }
 
     .result-item {
-      margin-bottom: 15px;
-      font-size: 17px;
-      word-wrap: break-word;
+      margin-bottom: 12px;
+      font-size: 15px;
+      line-height: 1.5;
+      color: #444;
     }
 
     .result-item strong {
-      color: #333;
+      color: #111;
+      display: block;
+      font-size: 13px;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 2px;
     }
 
-    #footer {
-      margin-top: 35px;
-      padding-top: 20px;
-      border-top: 1px solid #eee;
-      font-size: 14px;
-      font-style: italic;
-      color: #999;
-    }
-
+    /* --- TRANG LIÊN KẾT --- */
     #pages-container {
-      margin-top: 25px;
+      margin-top: 20px;
       text-align: left;
       border-top: 1px solid #eee;
-      padding-top: 20px;
-      font-size: 16px;
+      padding-top: 15px;
     }
 
-    .pages-list ul {
-      list-style-type: none;
-      padding-left: 0;
-      margin-top: 10px;
-    }
-
-    .pages-list li {
-      margin-bottom: 8px;
-    }
-
+    .pages-list strong { font-size: 14px; color: #333; }
+    .pages-list ul { list-style: none; padding: 0; margin: 10px 0 0; }
+    .pages-list li { margin-bottom: 10px; }
     .pages-list a {
       text-decoration: none;
       color: #0077cc;
-      font-weight: 500;
+      font-size: 15px;
+      display: block;
+      padding: 5px 0;
     }
 
-    .pages-list a:hover {
-      text-decoration: underline;
+    #footer {
+      margin-top: 25px;
+      padding-top: 15px;
+      border-top: 1px solid #eee;
+      font-size: 12px;
+      color: #aaa;
     }
 
-    #qr-modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.85);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-    }
+    /* --- TỐI ƯU MOBILE (QUAN TRỌNG) --- */
+    @media (max-width: 480px) {
+      body {
+        align-items: flex-start; /* Để màn hình cuộn tự nhiên từ trên xuống */
+        padding: 0;
+        background-color: white;
+      }
 
-    #qr-modal-content {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      width: 90%;
-      max-width: 400px;
-      text-align: center;
-      position: relative;
-    }
+      #container {
+        border-radius: 0;
+        box-shadow: none;
+        padding: 20px;
+      }
 
-    #qr-reader {
-      width: 100%;
-      margin-top: 10px;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    #qr-error {
-      color: #e74c3c;
-      margin-top: 15px;
-      font-size: 14px;
-    }
-
-    .close-modal-btn {
-      margin-top: 20px;
-      background-color: #e74c3c;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 6px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .close-modal-btn:hover {
-      background-color: #c0392b;
-    }
-
-    @media (max-width: 1024px) {
-      body { padding: 0; display: block; }
-      #container { max-width: 100%; border-radius: 0; box-shadow: none; min-height: 100vh; padding: 40px 30px; }
-      #logo { max-width: 360px; margin-bottom: 60px; }
-      #company-name { font-size: 36px; margin-bottom: 40px; }
-      h2.page-title { font-size: 44px; margin-bottom: 50px; }
+      #company-name { font-size: 16px; }
+      h2.page-title { font-size: 20px; }
       
-      .input-wrapper { margin-bottom: 40px; }
-      input[type="text"] { font-size: 34px; padding: 30px; padding-right: 100px; }
-      #scan-btn { right: 20px; }
-      #scan-btn svg { width: 48px; height: 48px; }
-
-      #button-group { gap: 30px; }
-      .btn { font-size: 36px; padding: 32px; }
-      #status { font-size: 30px; margin-top: 50px; }
-      #results { margin-top: 50px; padding-top: 50px; }
-      .result-item { font-size: 34px; margin-bottom: 30px; }
-      #pages-container { font-size: 32px; margin-top: 50px; padding-top: 40px; }
-      .pages-list li { margin-bottom: 16px; }
-      #footer { font-size: 28px; margin-top: 70px; padding-top: 40px; }
-
-      #qr-modal-content { padding: 30px; max-width: 90%; }
-      .close-modal-btn { font-size: 32px; padding: 20px; margin-top: 30px; border-radius: 12px;}
-      #qr-error { font-size: 28px; }
+      .btn {
+        padding: 16px; /* Tăng diện tích bấm cho ngón tay */
+        font-size: 17px;
+      }
+      
+      .result-item { font-size: 16px; }
     }
   </style>
 </head>
@@ -298,57 +200,32 @@
     
     <h2 class="page-title">Tra cứu thông tin thiết bị</h2>
     
-    <!-- Input Wrapper chứa ô nhập và nút Scan -->
-    <div class="input-wrapper">
-      <input type="text" id="deviceIdInput" placeholder="Quét mã QR hoặc Nhập mã số">
-      <button id="scan-btn" onclick="openQrScanner()" title="Quét mã QR">
-        <!-- SVG Icon QR Code -->
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M3 11H5V5H11V3H4C3.44772 3 3 3.44772 3 4V11ZM3 13H5V19H11V21H4C3.44772 21 3 20.5523 3 20V13ZM21 13H19V19H13V21H20C20.5523 21 21 20.5523 21 20V13ZM21 11H19V5H13V3H20C20.5523 3 21 3.44772 21 4V11ZM7 7H10V10H7V7ZM14 7H17V10H14V7ZM7 14H10V17H7V14ZM14 14H17V17H14V14Z"/>
-        </svg>
-      </button>
-    </div>
+    <input type="text" id="deviceIdInput" placeholder="Nhập mã số hoặc dán link..." inputmode="text">
     
     <div id="button-group">
-      <button id="search-button" class="btn" onclick="searchDevice()">Tra cứu</button>
-      <a href="#" id="support-link" class="btn support-button" onclick="openSupportForm(event)">Hỗ trợ / Báo hỏng</a>
+      <button id="search-button" class="btn" onclick="searchDevice()">TRA CỨU</button>
+      <a href="#" id="support-link" class="btn support-button" onclick="openSupportForm(event)">HỖ TRỢ / BÁO HỎNG</a>
     </div>
 
     <div id="status"></div>
     <div id="results">Mã số thiết bị được in trên nhãn dán, ví dụ: I123.</div>
     
-    <!-- KHU VỰC THÊM/BỚT TRANG NỘI DUNG TĨNH -->
     <div id="pages-container">
       <div class="pages-list">
         <strong>Thông tin hữu ích:</strong>
         <ul>
-          <li><a href="huong-dan.html">Hướng dẫn sử dụng thiết bị</a></li>
-          <li><a href="quy-dinh.html">Quy định quản lý tài sản</a></li>
+          <li><a href="huong-dan.html">➔ Hướng dẫn sử dụng thiết bị</a></li>
+          <li><a href="quy-dinh.html">➔ Quy định quản lý tài sản</a></li>
         </ul>
       </div>
     </div>
     
-    <div id="footer">Ứng dụng đang trong quá trình phát triển, rất mong nhận được ý kiến của toàn thể các anh/chị.</div>
-  </div>
-
-  <!-- Popup Modal Quét QR -->
-  <div id="qr-modal">
-    <div id="qr-modal-content">
-      <h3 style="margin-top: 0;">Quét mã QR</h3>
-      <div id="qr-reader"></div>
-      <div id="qr-error"></div>
-      <button class="close-modal-btn" onclick="closeQrScanner()">Đóng</button>
-    </div>
+    <div id="footer">Ứng dụng được phát triển bởi Bộ phận CNTT HEM EMM</div>
   </div>
 
   <script>
-    // --- CẤU HÌNH ---
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxhgQXWtrvCIaVJejEDoEbbD5eWfpA6KvvwouCAYlA_PjlfyXi14R0QNh8AQxPNMxeHkg/exec";
-    let html5QrCode = null; // Biến lưu trữ instance của máy quét
 
-    /**
-     * Tách mã thiết bị từ chuỗi bất kỳ có chứa /21/
-     */
     function extractId(input) {
       if (!input) return "";
       const value = input.trim();
@@ -362,9 +239,6 @@
       return value;
     }
 
-    /**
-     * Gọi API Google Apps Script để tìm kiếm
-     */
     async function searchDevice() {
       const inputField = document.getElementById('deviceIdInput');
       const deviceId = extractId(inputField.value);
@@ -376,8 +250,8 @@
         return;
       }
 
-      inputField.value = deviceId; // Hiển thị mã sạch
-      statusDiv.innerHTML = 'Đang truy xuất dữ liệu...';
+      inputField.value = deviceId; 
+      statusDiv.innerHTML = 'Đang tìm kiếm...';
       resultsDiv.innerHTML = '';
 
       try {
@@ -388,27 +262,24 @@
 
         if (result.status === 'success') {
           resultsDiv.innerHTML = `
-            <div class="result-item"><strong>Loại thiết bị:</strong> ${result.type || 'N/A'}</div>
-            <div class="result-item"><strong>Người sử dụng:</strong> ${result.user || 'N/A'}</div>
-            <div class="result-item"><strong>Mô tả / Thông số:</strong> ${result.description || 'N/A'}</div>
+            <div class="result-item"><strong>Loại thiết bị</strong> ${result.type || 'N/A'}</div>
+            <div class="result-item"><strong>Người quản lý</strong> ${result.user || 'N/A'}</div>
+            <div class="result-item"><strong>Mô tả chi tiết</strong> ${result.description || 'N/A'}</div>
           `;
         } else {
-          resultsDiv.innerHTML = `<p style="color:red; font-size: 17px;">Không tìm thấy mã: ${deviceId}</p>`;
+          resultsDiv.innerHTML = `<p style="color:#d93025; font-weight:bold;">Không tìm thấy mã: ${deviceId}</p>`;
         }
       } catch (error) {
         statusDiv.innerHTML = '';
-        resultsDiv.innerHTML = `<p style="color:red; font-size: 17px;">Lỗi kết nối máy chủ.</p>`;
+        resultsDiv.innerHTML = `<p style="color:#d93025;">Lỗi kết nối máy chủ dữ liệu.</p>`;
       }
     }
 
-    /**
-     * Mở Google Form điền sẵn mã thiết bị
-     */
     function openSupportForm(event) {
       event.preventDefault();
       const deviceId = extractId(document.getElementById('deviceIdInput').value);
       if (!deviceId) {
-        showMessageBox('Vui lòng nhập mã thiết bị trước.');
+        alert('Vui lòng nhập mã thiết bị trước.');
         return;
       }
       const baseFormUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSdq4dOqfso_jYJudquLU7SNNN39EX0fPLzWWG9-dhDjWWlrHQ/viewform?usp=dialog';
@@ -416,72 +287,6 @@
       window.open(finalUrl, '_blank');
     }
 
-    /**
-     * Hàm hiển thị thông báo thay thế alert()
-     */
-    function showMessageBox(msg) {
-        const statusDiv = document.getElementById('status');
-        statusDiv.innerHTML = `<span style="color: red;">${msg}</span>`;
-    }
-
-    /**
-     * Mở Popup và khởi động Camera Quét QR
-     */
-    function openQrScanner() {
-      const modal = document.getElementById('qr-modal');
-      const errorDiv = document.getElementById('qr-error');
-      
-      modal.style.display = 'flex';
-      errorDiv.innerText = ''; // Xóa lỗi cũ
-
-      // Nếu đã khởi tạo rồi thì dùng lại
-      if (!html5QrCode) {
-        html5QrCode = new Html5Qrcode("qr-reader");
-      }
-
-      // Xin quyền và bật camera sau (environment)
-      html5QrCode.start(
-        { facingMode: "environment" },
-        {
-          fps: 10,    // Tốc độ quét 10 frame/s
-          qrbox: { width: 250, height: 250 } // Khu vực lấy nét
-        },
-        (decodedText, decodedResult) => {
-          // KHI QUÉT THÀNH CÔNG
-          closeQrScanner(); // Tắt popup và camera
-          document.getElementById('deviceIdInput').value = decodedText;
-          searchDevice(); // Tự động tra cứu
-        },
-        (errorMessage) => {
-          // Bỏ qua lỗi parse, vì hàm này gọi liên tục khi không tìm thấy QR
-        }
-      ).catch((err) => {
-        // Lỗi khi từ chối quyền camera hoặc thiết bị không có camera
-        errorDiv.innerText = "Không thể truy cập Camera. Vui lòng cấp quyền chụp ảnh/quay phim cho trình duyệt.";
-        console.error("Lỗi Camera:", err);
-      });
-    }
-
-    /**
-     * Tắt Popup và dừng Camera
-     */
-    function closeQrScanner() {
-      const modal = document.getElementById('qr-modal');
-      if (html5QrCode && html5QrCode.isScanning) {
-        html5QrCode.stop().then(() => {
-          modal.style.display = 'none';
-        }).catch((err) => {
-          console.error("Lỗi khi dừng camera:", err);
-          modal.style.display = 'none';
-        });
-      } else {
-        modal.style.display = 'none';
-      }
-    }
-
-    /**
-     * Xử lý khi trang web vừa tải xong
-     */
     document.addEventListener('DOMContentLoaded', function() {
       const inputField = document.getElementById('deviceIdInput');
       const urlParams = new URLSearchParams(window.location.search);
@@ -502,7 +307,10 @@
       }
 
       inputField.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') searchDevice();
+        if (e.key === 'Enter') {
+          inputField.blur(); // Ẩn bàn phím mobile sau khi nhấn Enter
+          searchDevice();
+        }
       });
     });
   </script>
